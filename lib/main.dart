@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'screens/projects_screen.dart';
+import 'screens/home_screen.dart';
 
 void main() {
   runApp(const MyApp());
@@ -13,7 +13,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Project Management App',
       theme: ThemeData(primarySwatch: Colors.blue, useMaterial3: true),
-      home: const ProjectsScreen(),
+      home: const HomeScreen(),
       debugShowCheckedModeBanner: false,
     );
   }

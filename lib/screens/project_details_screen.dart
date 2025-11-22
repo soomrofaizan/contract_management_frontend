@@ -139,7 +139,7 @@ class _ProjectDetailsScreenState extends State<ProjectDetailsScreen> {
                     ),
                   ),
                   const SizedBox(height: 8),
-                  Text('Status: ${widget.project.status}'),
+                  Text('Status: ${widget.project.status.name}'),
                   Text('Start Date: ${_formatDate(widget.project.startDate)}'),
                   Text('End Date: ${_formatDate(widget.project.endDate)}'),
                   Text(

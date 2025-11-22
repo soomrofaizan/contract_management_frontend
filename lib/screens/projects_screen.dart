@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../models/models.dart';
 import '../services/api_services.dart';
 import 'project_details_screen.dart';
+import 'add_item_screen.dart';
 
 class EditProjectDialog extends StatefulWidget {
   final Project project;
@@ -222,7 +223,10 @@ class _EditProjectDialogState extends State<EditProjectDialog> {
 }
 
 class ProjectsScreen extends StatefulWidget {
-  const ProjectsScreen({super.key});
+  final String? filterStatus;
+  final bool showFAB;
+
+  const ProjectsScreen({super.key, this.filterStatus, this.showFAB = true});
 
   @override
   State<ProjectsScreen> createState() => _ProjectsScreenState();
@@ -297,13 +301,13 @@ class _ProjectsScreenState extends State<ProjectsScreen> {
         _statuses = [
           ProjectStatus(
             id: 1,
-            name: 'Box Up',
+            name: 'Completed',
             description: 'Project is completed',
             isActive: true,
           ),
           ProjectStatus(
             id: 2,
-            name: 'In Progess',
+            name: 'Running',
             description: 'Project is in progress',
             isActive: true,
           ),
@@ -323,9 +327,17 @@ class _ProjectsScreenState extends State<ProjectsScreen> {
         statusId: statusFilter,
         sortBy: sortBy,
       );
+
+      List<Project> filtered = projects;
+      if (widget.filterStatus != null) {
+        filtered = projects.where((project) {
+          return project.status.name.toUpperCase() ==
+              widget.filterStatus!.toUpperCase();
+        }).toList();
+      }
       setState(() {
         _projects = projects;
-        _filteredProjects = projects;
+        _filteredProjects = filtered;
         _isLoading = false;
       });
     } catch (e) {
@@ -333,6 +345,16 @@ class _ProjectsScreenState extends State<ProjectsScreen> {
       setState(() {
         _isLoading = false;
       });
+    }
+  }
+
+  String _getAppBarTitle() {
+    if (widget.filterStatus == 'Completed') {
+      return 'Completed Projects';
+    } else if (widget.filterStatus == 'Running') {
+      return 'In Progress Projects';
+    } else {
+      return 'All Projects';
     }
   }
 
@@ -503,17 +525,28 @@ class _ProjectsScreenState extends State<ProjectsScreen> {
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
           : _projects.isEmpty
-          ? const Center(
-              child: Text(
-                'No projects found.\nTap the + button to add one.',
-                textAlign: TextAlign.center,
-                style: TextStyle(fontSize: 16),
+          ? Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Icon(Icons.folder_open, size: 64, color: Colors.grey),
+                  const SizedBox(height: 16),
+                  Text(
+                    widget.filterStatus == 'Completed'
+                        ? 'No completed projects found.'
+                        : widget.filterStatus == 'Running'
+                        ? 'No in-progress projects found.'
+                        : 'No projects found.',
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(fontSize: 16, color: Colors.grey),
+                  ),
+                ],
               ),
             )
           : ListView.builder(
-              itemCount: _projects.length,
+              itemCount: _filteredProjects.length,
               itemBuilder: (context, index) {
-                final project = _projects[index];
+                final project = _filteredProjects[index];
                 return ProjectCard(
                   project: project,
                   onTap: () => _navigateToProjectDetails(project),
@@ -522,10 +555,12 @@ class _ProjectsScreenState extends State<ProjectsScreen> {
                 );
               },
             ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _addProject,
-        child: const Icon(Icons.add),
-      ),
+      floatingActionButton: widget.showFAB
+          ? FloatingActionButton(
+              onPressed: _addProject,
+              child: const Icon(Icons.add),
+            )
+          : null,
     );
   }
 }
